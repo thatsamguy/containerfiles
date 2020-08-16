@@ -44,7 +44,7 @@ jobs:
         type: registry-image
       inputs:
       - name: containerfiles
-        path: certbot-dns
+        path: containerfiles/certbot-dns
       outputs:
       - name: image
       platform: linux
