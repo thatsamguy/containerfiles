@@ -68,7 +68,7 @@ resources:
   source:
     branch: main
     password: ((github-password))
-    uri: https://github.com/thatsamguy/containerfiles.git
+    uri: git@github.com:thatsamguy/containerfiles.git
     username: ((github-username))
   type: git
 - icon: slack
