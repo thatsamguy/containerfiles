@@ -70,6 +70,7 @@ resources:
     password: ((github-password))
     uri: git@github.com:thatsamguy/containerfiles.git
     username: ((github-username))
+    private_key: ((github-private-key))
   type: git
 - icon: slack
   name: notify
