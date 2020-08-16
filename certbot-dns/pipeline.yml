@@ -1,0 +1,81 @@
+jobs:
+- name: pipeline
+  plan:
+  - get: containerfiles
+    trigger: true
+  - file: containerfiles/certbot-dns/pipeline.yml
+    set_pipeline: img-certbot-dns
+- name: build-and-push
+  on_error:
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :boom: A build of $BUILD_PIPELINE_NAME errored. Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+      username: concourse
+    put: notify
+  on_failure:
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :boom: A build of $BUILD_PIPELINE_NAME failed. Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+      username: concourse
+    put: notify
+  on_success:
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :airplane_departure: A new build of $BUILD_PIPELINE_NAME deployed! Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+      username: concourse
+    put: notify
+  plan:
+  - get: containerfiles
+    passed:
+    - pipeline
+  - config:
+      image_resource:
+        source:
+          repository: vito/oci-build-task
+        type: registry-image
+      inputs:
+      - name: containerfiles
+        path: certbot-dns
+      outputs:
+      - name: image
+      platform: linux
+      run:
+        path: build
+    privileged: true
+    task: build
+  - put: dockerhub
+resource_types:
+- name: slack-notification
+  source:
+    repository: cfcommunity/slack-notification-resource
+  type: docker-image
+resources:
+- icon: github
+  name: containerfiles
+  source:
+    branch: main
+    password: ((github-password))
+    uri: https://github.com/thatsamguy/containerfiles.git
+    username: ((github-username))
+  type: git
+- icon: slack
+  name: notify
+  source:
+    url: ((slack-webhook))
+  type: slack-notification
+- icon: docker
+  name: dockerhub
+  source:
+    password: ((dockerhub-accesstoken))
+    repository: thatsamguy/certbot-dns
+    username: ((dockerhub-username))
+  type: registry-image
