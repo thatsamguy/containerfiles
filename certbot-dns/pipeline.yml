@@ -35,9 +35,9 @@ jobs:
     put: notify
   plan:
   - get: containerfiles
-    trigger: true
     passed:
     - pipeline
+    trigger: true
   - config:
       image_resource:
         source:
@@ -45,16 +45,18 @@ jobs:
         type: registry-image
       inputs:
       - name: containerfiles
-        path: containerfiles/certbot-dns
       outputs:
       - name: image
+      params:
+        CONTEXT: containerfiles/certbot-dns
       platform: linux
       run:
         path: build
     privileged: true
     task: build
-  - put: dockerhub
-    params: {image: image/image.tar}
+  - params:
+      image: image/image.tar
+    put: dockerhub
 resource_types:
 - name: slack-notification
   source:
