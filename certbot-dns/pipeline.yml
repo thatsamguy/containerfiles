@@ -38,6 +38,8 @@ jobs:
     passed:
     - pipeline
     trigger: true
+  - get: every-monday
+    trigger: true
   - config:
       image_resource:
         source:
@@ -68,9 +70,9 @@ resources:
   source:
     branch: main
     password: ((github-password))
+    private_key: ((github-private-key))
     uri: git@github.com:thatsamguy/containerfiles.git
     username: ((github-username))
-    private_key: ((github-private-key))
   type: git
 - icon: slack
   name: notify
@@ -84,3 +86,12 @@ resources:
     repository: thatsamguy/certbot-dns
     username: ((dockerhub-username))
   type: registry-image
+- icon: clock-outline
+  name: every-monday
+  source:
+    days:
+    - Monday
+    location: Australia/Melbourne
+    start: 12:00 AM
+    stop: 5:00 AM
+  type: time
