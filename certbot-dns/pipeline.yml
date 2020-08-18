@@ -1,3 +1,10 @@
+groups:
+- jobs:
+  - build-and-push
+  name: build
+- jobs:
+  - pipeline
+  name: pipeline-update
 jobs:
 - name: pipeline
   plan:
