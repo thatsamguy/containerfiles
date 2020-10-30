@@ -41,9 +41,11 @@ jobs:
       username: concourse
     put: notify
   plan:
-  - get: dockerfiles
+  - get: containerfiles
     passed:
     - pipeline
+    trigger: true
+  - get: dockerfiles
     trigger: true
   - config:
       image_resource:
