@@ -1,0 +1,100 @@
+groups:
+- jobs:
+  - build-and-push
+  name: build
+- jobs:
+  - pipeline
+  name: pipeline-update
+jobs:
+- name: pipeline
+  plan:
+  - get: containerfiles
+    trigger: true
+  - file: containerfiles/unifi/pipeline.yml
+    set_pipeline: img-unifi
+- name: build-and-push
+  on_error:
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :boom: A build of $BUILD_PIPELINE_NAME errored. Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+      username: concourse
+    put: notify
+  on_failure:
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :boom: A build of $BUILD_PIPELINE_NAME failed. Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+      username: concourse
+    put: notify
+  on_success:
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :airplane_departure: A new build of $BUILD_PIPELINE_NAME deployed! Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+      username: concourse
+    put: notify
+  plan:
+  - get: dockerfiles
+    passed:
+    - pipeline
+    trigger: true
+  - config:
+      image_resource:
+        source:
+          repository: vito/oci-build-task
+        type: registry-image
+      inputs:
+      - name: containerfiles
+      outputs:
+      - name: image
+      params:
+        CONTEXT: dockerfiles/unifi
+      platform: linux
+      run:
+        path: build
+    privileged: true
+    task: build
+  - params:
+      image: image/image.tar
+    put: registry
+resource_types:
+- name: slack-notification
+  source:
+    repository: cfcommunity/slack-notification-resource
+  type: docker-image
+resources:
+- icon: github
+  name: containerfiles
+  source:
+    branch: main
+    password: ((github-password))
+    private_key: ((github-private-key))
+    uri: git@github.com:thatsamguy/containerfiles.git
+    username: ((github-username))
+  type: git
+- icon: github
+  name: dockerfiles
+  source:
+    branch: unifi-update
+    password: ((github-password))
+    private_key: ((github-private-key))
+    uri: git@github.com:thatsamguy/jessfraz-dockerfiles.git
+    username: ((github-username))
+  type: git
+- icon: slack
+  name: notify
+  source:
+    url: ((slack-webhook))
+  type: slack-notification
+- icon: docker
+  name: registry
+  source:
+    repository: registry.thatsamguy.com/thatsamguy/unifi
+  type: registry-image
