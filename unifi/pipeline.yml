@@ -50,10 +50,28 @@ jobs:
   - config:
       image_resource:
         source:
+          repository: ubuntu
+          tag: 20.04
+        type: registry-image
+      inputs:
+      - name: dockerfiles
+      outputs:
+      - name: tags
+      platform: linux
+      run:
+        args:
+        - -euxc
+        - VERSION=$(cat dockerfiles/unifi/Dockerfile | grep 'ENV UNIFI_VERSION' | cut -d'"' -f2);
+          if [[ "$VERSION" != "" ]]; then echo "$VERSION " >> tags/tags; else exit 1; fi;
+        path: bash
+    task: tag
+  - config:
+      image_resource:
+        source:
           repository: vito/oci-build-task
         type: registry-image
       inputs:
-      - name: containerfiles
+      - name: dockerfiles
       outputs:
       - name: image
       params:
@@ -65,6 +83,7 @@ jobs:
     task: build
   - params:
       image: image/image.tar
+      additional_tags: tags/tags
     put: registry
 resource_types:
 - name: slack-notification
