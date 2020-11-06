@@ -84,7 +84,7 @@ jobs:
   - params:
       image: image/image.tar
       additional_tags: tags/tags
-    put: registry
+    put: thatsamguy-registry
 resource_types:
 - name: slack-notification
   source:
@@ -115,7 +115,7 @@ resources:
     url: ((slack-webhook))
   type: slack-notification
 - icon: docker
-  name: registry
+  name: thatsamguy-registry
   source:
     repository: registry.thatsamguy.com/thatsamguy/unifi
   type: registry-image

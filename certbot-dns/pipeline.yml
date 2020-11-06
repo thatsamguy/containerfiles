@@ -66,6 +66,9 @@ jobs:
   - params:
       image: image/image.tar
     put: dockerhub
+  - params:
+      image: image/image.tar
+    put: thatsamguy-registry
 resource_types:
 - name: slack-notification
   source:
@@ -92,6 +95,11 @@ resources:
     password: ((dockerhub-accesstoken))
     repository: thatsamguy/certbot-dns
     username: ((dockerhub-username))
+  type: registry-image
+- icon: docker
+  name: thatsamguy-registry
+  source:
+    repository: registry.thatsamguy.com/thatsamguy/certbot-dns
   type: registry-image
 - icon: clock-outline
   name: every-monday
