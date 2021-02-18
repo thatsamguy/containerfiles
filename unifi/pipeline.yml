@@ -99,6 +99,8 @@ resources:
     private_key: ((github-private-key))
     uri: git@github.com:thatsamguy/containerfiles.git
     username: ((github-username))
+    paths:
+    - unifi/**
   type: git
 - icon: github
   name: dockerfiles
