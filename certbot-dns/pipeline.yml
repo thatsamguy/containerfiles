@@ -61,7 +61,8 @@ jobs:
       run:
         args:
         - -euxc
-        - VERSION=$(pip3 install certbot && pip3 list certbot --format freeze | grep certbot | cut -d'=' -f3);
+        - pip3 install certbot;
+          VERSION=$(pip3 list certbot --format freeze | grep certbot | cut -d'=' -f3);
           if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
         path: bash
     task: tag
