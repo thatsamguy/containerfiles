@@ -60,7 +60,7 @@ jobs:
         args:
         - -euxc
         - VERSION=$(cat containerfiles/elasticsearch/Dockerfile | grep 'FROM' | cut -d':' -f2 | cut -d'@' -f1);
-          if [[ "$VERSION" != "" ]]; then echo "$VERSION " >> tags/tags; else exit 1; fi;
+          if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
         path: bash
     task: tag
   - config:

@@ -62,7 +62,7 @@ jobs:
         args:
         - -euxc
         - VERSION=$(cat dockerfiles/unifi/Dockerfile | grep 'ENV UNIFI_VERSION' | cut -d'"' -f2);
-          if [[ "$VERSION" != "" ]]; then echo "$VERSION " >> tags/tags; else exit 1; fi;
+          if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
         path: bash
     task: tag
   - config:
