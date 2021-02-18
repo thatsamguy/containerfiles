@@ -124,6 +124,7 @@ resources:
   name: thatsamguy-registry
   source:
     repository: registry.thatsamguy.com/thatsamguy/certbot-dns
+    tag: latest
   type: registry-image
 - icon: clock-outline
   name: every-monday
