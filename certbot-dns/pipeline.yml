@@ -65,9 +65,6 @@ jobs:
     task: build
   - params:
       image: image/image.tar
-    put: dockerhub
-  - params:
-      image: image/image.tar
     put: thatsamguy-registry
 resource_types:
 - name: slack-notification
@@ -91,14 +88,6 @@ resources:
   source:
     url: ((slack-webhook))
   type: slack-notification
-- icon: docker
-  name: dockerhub
-  source:
-    password: ((dockerhub-accesstoken))
-    repository: thatsamguy/certbot-dns
-    username: ((dockerhub-username))
-    tag: latest
-  type: registry-image
 - icon: docker
   name: thatsamguy-registry
   source:
