@@ -48,6 +48,24 @@ jobs:
   - config:
       image_resource:
         source:
+          repository: ubuntu
+          tag: 20.04
+        type: registry-image
+      inputs:
+      - name: containerfiles
+      outputs:
+      - name: tags
+      platform: linux
+      run:
+        args:
+        - -euxc
+        - VERSION=$(cat containerfiles/elasticsearch/Dockerfile | grep 'FROM' | cut -d':' -f2 | cut -d'@' -f1);
+          if [[ "$VERSION" != "" ]]; then echo "$VERSION " >> tags/tags; else exit 1; fi;
+        path: bash
+    task: tag
+  - config:
+      image_resource:
+        source:
           repository: vito/oci-build-task
         type: registry-image
       inputs:
@@ -63,9 +81,7 @@ jobs:
     task: build
   - params:
       image: image/image.tar
-    put: dockerhub
-  - params:
-      image: image/image.tar
+      additional_tags: tags/tags
     put: thatsamguy-registry
 resource_types:
 - name: slack-notification
@@ -87,13 +103,6 @@ resources:
   source:
     url: ((slack-webhook))
   type: slack-notification
-- icon: docker
-  name: dockerhub
-  source:
-    password: ((dockerhub-accesstoken))
-    repository: thatsamguy/elasticsearch
-    username: ((dockerhub-username))
-  type: registry-image
 - icon: docker
   name: thatsamguy-registry
   source:
