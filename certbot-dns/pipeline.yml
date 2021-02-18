@@ -50,6 +50,23 @@ jobs:
   - config:
       image_resource:
         source:
+          repository: clearlinux/python
+          tag: latest
+        type: registry-image
+      inputs:
+      - name: containerfiles
+      outputs:
+      - name: tags
+      platform: linux
+      run:
+        args:
+        - -euxc
+        - pip3 install certbot== 2>&1 | grep versions | cut -d':' -f3 | cut -d')' -f1 | tr ' ' '\n' | sort -V | tail -n1
+        path: bash
+    task: tag
+  - config:
+      image_resource:
+        source:
           repository: vito/oci-build-task
         type: registry-image
       inputs:
@@ -65,9 +82,11 @@ jobs:
     task: build
   - params:
       image: image/image.tar
+      additional_tags: tags/tags
     put: dockerhub
   - params:
       image: image/image.tar
+      additional_tags: tags/tags
     put: thatsamguy-registry
 resource_types:
 - name: slack-notification
