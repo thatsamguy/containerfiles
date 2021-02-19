@@ -14,13 +14,15 @@ do
     # specially
     if [[ "\$envvar_key" =~ ^ESOPT_[a-z0-9_]+\_[a-z0-9_]+ || "\$envvar_key" == "ESOPT_processors" ]]; then
         if [[ ! -z \$envvar_value ]]; then
-            envvar_real_key="$(echo "\${envvar_key}" | sed 's/\_/\./g' | cut -c7-256)"
+            envvar_real_key="$(echo "\${envvar_key}" | cut -c7-256 | sed '0,/_/s//./' )"
             es_opt="-E\${envvar_real_key}=\${envvar_value}"
             es_opts+=("\${es_opt}")
         fi
     fi
 done < <(env)
 
+# echo out final command
+set -x
 EOF
 } >> /usr/local/bin/docker-entrypoint.sh && \
 tail -n 1 /usr/local/bin/docker-entrypoint.sh.orig >> /usr/local/bin/docker-entrypoint.sh && \
