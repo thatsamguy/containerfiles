@@ -1,7 +1,6 @@
 FROM clearlinux/python:latest
 
-RUN clrtrust generate && \
-    pip3 install \
+RUN pip3 install \
     certbot \
     certbot-dns-cloudflare \
     certbot-dns-cloudxns \
