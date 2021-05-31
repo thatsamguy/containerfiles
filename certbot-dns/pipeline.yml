@@ -50,7 +50,7 @@ jobs:
   - config:
       image_resource:
         source:
-          repository: clearlinux/python
+          repository: python
           tag: latest
         type: registry-image
       inputs:
