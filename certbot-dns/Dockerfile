@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:slim
 
 RUN pip3 install \
     certbot \

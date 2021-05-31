@@ -51,7 +51,7 @@ jobs:
       image_resource:
         source:
           repository: python
-          tag: latest
+          tag: slim
         type: registry-image
       inputs:
       - name: containerfiles
