@@ -37,8 +37,6 @@ jobs:
     passed:
     - pipeline
     trigger: true
-  - get: every-monday
-    trigger: true
   - config:
       image_resource:
         source:
@@ -87,12 +85,3 @@ resources:
     repository: registry.thatsamguy.com/thatsamguy/honeyaws
     tag: latest
   type: registry-image
-- icon: clock-outline
-  name: every-monday
-  source:
-    days:
-    - Monday
-    location: Australia/Melbourne
-    start: 12:00 AM
-    stop: 5:00 AM
-  type: time

@@ -8,7 +8,4 @@ RUN curl -sL https://honeycomb.io/download/honeyaws/v1.4.0/honeyalb-linux-amd64 
     echo 'f03c3199b8284743b9f40ee717628d1737be8b9dcceeb2bc604464896870b2de  honeyalb' | sha256sum -c
 RUN curl -sL https://honeycomb.io/download/honeyaws/v1.4.0/honeyelb-linux-amd64 --output honeyelb && \
     echo '01629098f45d1ae5a59b37e73bcf7e10a96ddcc171e5dd38b726cb07f9c9c959  honeyelb' | sha256sum -c
-RUN chmod 755 ./honey*
-
-FROM public.ecr.aws/lts/ubuntu:20.04
-COPY --from=build honey* /usr/local/bin/
+RUN chmod 755 ./honey* && mv -v honey* /usr/local/bin/
