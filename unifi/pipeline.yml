@@ -13,31 +13,23 @@ jobs:
   - file: containerfiles/unifi/pipeline.yml
     set_pipeline: img-unifi
 - name: build-and-push
-  on_error:
+  on_error: &failure
     params:
       channel: '#build'
       icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
       silent: true
       text: |
-        :boom: A build of $BUILD_PIPELINE_NAME errored. Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+        :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
       username: concourse
     put: notify
-  on_failure:
+  on_failure: *failure
+  on_success: &success
     params:
       channel: '#build'
       icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
       silent: true
       text: |
-        :boom: A build of $BUILD_PIPELINE_NAME failed. Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
-      username: concourse
-    put: notify
-  on_success:
-    params:
-      channel: '#build'
-      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
-      silent: true
-      text: |
-        :airplane_departure: A new build of $BUILD_PIPELINE_NAME deployed! Check it out <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|here>.
+        :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
       username: concourse
     put: notify
   plan:
