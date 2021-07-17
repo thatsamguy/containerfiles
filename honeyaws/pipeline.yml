@@ -1,0 +1,98 @@
+groups:
+- jobs:
+  - build-and-push
+  name: build
+- jobs:
+  - pipeline
+  name: pipeline-update
+jobs:
+- name: pipeline
+  plan:
+  - get: containerfiles
+    trigger: true
+  - file: containerfiles/honeyaws/pipeline.yml
+    set_pipeline: img-honeyaws
+- name: build-and-push
+  on_error: &failure
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
+      username: concourse
+    put: notify
+  on_failure: *failure
+  on_success: &success
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
+      username: concourse
+    put: notify
+  plan:
+  - get: containerfiles
+    passed:
+    - pipeline
+    trigger: true
+  - get: every-monday
+    trigger: true
+  - config:
+      image_resource:
+        source:
+          repository: vito/oci-build-task
+        type: registry-image
+      inputs:
+      - name: containerfiles
+      outputs:
+      - name: image
+      params:
+        CONTEXT: containerfiles/honeyaws
+      platform: linux
+      run:
+        path: build
+    privileged: true
+    task: build
+  - params:
+      image: image/image.tar
+      additional_tags: tags/tags
+    put: thatsamguy-registry
+resource_types:
+- name: slack-notification
+  source:
+    repository: cfcommunity/slack-notification-resource
+  type: docker-image
+resources:
+- icon: github
+  name: containerfiles
+  source:
+    branch: main
+    password: ((github-password))
+    private_key: ((github-private-key))
+    uri: git@github.com:thatsamguy/containerfiles.git
+    username: ((github-username))
+    paths:
+    - honeyaws/**
+  type: git
+- icon: slack
+  name: notify
+  source:
+    url: ((slack-webhook))
+  type: slack-notification
+- icon: docker
+  name: thatsamguy-registry
+  source:
+    repository: registry.thatsamguy.com/thatsamguy/honeyaws
+    tag: latest
+  type: registry-image
+- icon: clock-outline
+  name: every-monday
+  source:
+    days:
+    - Monday
+    location: Australia/Melbourne
+    start: 12:00 AM
+    stop: 5:00 AM
+  type: time
