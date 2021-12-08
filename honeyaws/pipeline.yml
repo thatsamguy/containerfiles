@@ -55,7 +55,7 @@ jobs:
     task: build
   - params:
       image: image/image.tar
-      version: 1.4.0
+      version: 1.4.2
     put: thatsamguy-registry
 resource_types:
 - name: slack-notification
