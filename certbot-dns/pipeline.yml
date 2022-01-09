@@ -64,7 +64,7 @@ jobs:
     - config:
         image_resource:
           source:
-            repository: rdclda/concourse-oci-build-task #vito/oci-build-task
+            repository: rdclda/concourse-oci-build-task
           type: registry-image
         inputs:
         - name: containerfiles

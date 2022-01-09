@@ -22,6 +22,7 @@ jobs:
         :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
       username: concourse
     put: notify
+    tags: [amd64]
   on_failure: *failure
   on_success: &success
     params:
@@ -32,31 +33,59 @@ jobs:
         :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
       username: concourse
     put: notify
+    tags: [amd64]
   plan:
   - get: containerfiles
     passed:
     - pipeline
     trigger: true
-  - config:
-      image_resource:
-        source:
-          repository: vito/oci-build-task
-        type: registry-image
-      inputs:
-      - name: containerfiles
-      outputs:
-      - name: image
-      params:
-        CONTEXT: containerfiles/honeyaws
-      platform: linux
-      run:
-        path: build
-    privileged: true
-    task: build
-  - params:
-      image: image/image.tar
-      version: 1.4.2
-    put: thatsamguy-registry
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: rdclda/concourse-oci-build-task
+          type: registry-image
+        inputs:
+        - name: containerfiles
+        outputs:
+        - name: image
+        params:
+          CONTEXT: containerfiles/honeyaws
+          DOCKERFILE: Dockerfile.arm64
+        platform: linux
+        run:
+          path: build
+      privileged: true
+      task: build-arm64
+      tags: [arm64]
+    - config:
+        image_resource:
+          source:
+            repository: vito/oci-build-task
+          type: registry-image
+        inputs:
+        - name: containerfiles
+        outputs:
+        - name: image
+        params:
+          CONTEXT: containerfiles/honeyaws
+        platform: linux
+        run:
+          path: build
+      privileged: true
+      task: build-amd64
+      tags: [amd64]
+  - in_parallel:
+    - params:
+        image: image/image.tar
+        version: 1.4.2
+      put: thatsamguy-registry-arm64
+      tags: [arm64]
+    - params:
+        image: image/image.tar
+        version: 1.4.2
+      put: thatsamguy-registry-amd64
+      tags: [amd64]
 resource_types:
 - name: slack-notification
   source:
@@ -80,8 +109,14 @@ resources:
     url: ((slack-webhook))
   type: slack-notification
 - icon: docker
-  name: thatsamguy-registry
+  name: thatsamguy-registry-amd64
   source:
     repository: registry.thatsamguy.com/thatsamguy/honeyaws
+    tag: latest
+  type: registry-image
+- icon: docker
+  name: thatsamguy-registry-arm64
+  source:
+    repository: registry.thatsamguy.com/thatsamguy/honeyaws-arm64
     tag: latest
   type: registry-image
