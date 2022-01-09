@@ -78,11 +78,6 @@ jobs:
       privileged: true
       task: build-arm64
       tags: [arm64]
-    - params:
-        image: image/image.tar
-        additional_tags: tags/tags
-      put: thatsamguy-registry-arm64
-      tags: [arm64]
     - config:
         image_resource:
           source:
@@ -100,6 +95,12 @@ jobs:
       privileged: true
       task: build-amd64
       tags: [amd64]
+  - in_parallel:
+    - params:
+        image: image/image.tar
+        additional_tags: tags/tags
+      put: thatsamguy-registry-arm64
+      tags: [arm64]
     - params:
         image: image/image.tar
         additional_tags: tags/tags
