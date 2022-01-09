@@ -1,6 +1,7 @@
 groups:
 - jobs:
-  - build-and-push
+  - build-arm64
+  - build-amd64
   name: build
 - jobs:
   - pipeline
@@ -12,7 +13,7 @@ jobs:
     trigger: true
   - file: containerfiles/honeyaws/pipeline.yml
     set_pipeline: img-honeyaws
-- name: build-and-push
+- name: build-arm64
   on_error: &failure
     params:
       channel: '#build'
@@ -39,53 +40,78 @@ jobs:
     passed:
     - pipeline
     trigger: true
-  - in_parallel:
-    - config:
-        image_resource:
-          source:
-            repository: rdclda/concourse-oci-build-task
-          type: registry-image
-        inputs:
-        - name: containerfiles
-        outputs:
-        - name: image-arm64
-        params:
-          CONTEXT: containerfiles/honeyaws
-          DOCKERFILE: containerfiles/honeyaws/Dockerfile.arm64
-        platform: linux
-        run:
-          path: build
-      privileged: true
-      task: build-arm64
-      tags: [arm64]
-    - config:
-        image_resource:
-          source:
-            repository: vito/oci-build-task
-          type: registry-image
-        inputs:
-        - name: containerfiles
-        outputs:
-        - name: image-amd64
-        params:
-          CONTEXT: containerfiles/honeyaws
-        platform: linux
-        run:
-          path: build
-      privileged: true
-      task: build-amd64
-      tags: [amd64]
-  - in_parallel:
-    - params:
-        image: image-arm64/image.tar
-        version: 1.4.2
-      put: thatsamguy-registry-arm64
-      tags: [arm64]
-    - params:
-        image: image-amd64/image.tar
-        version: 1.4.2
-      put: thatsamguy-registry-amd64
-      tags: [amd64]
+  - config:
+      image_resource:
+        source:
+          repository: rdclda/concourse-oci-build-task
+        type: registry-image
+      inputs:
+      - name: containerfiles
+      outputs:
+      - name: image
+      params:
+        CONTEXT: containerfiles/honeyaws
+        DOCKERFILE: containerfiles/honeyaws/Dockerfile.arm64
+      platform: linux
+      run:
+        path: build
+    privileged: true
+    task: build-arm64
+    tags: [arm64]
+  - params:
+      image: image/image.tar
+      version: 1.4.2
+    put: thatsamguy-registry-arm64
+    tags: [arm64]
+- name: build-amd64
+  on_error: &failure
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
+      username: concourse
+    put: notify
+    tags: [amd64]
+  on_failure: *failure
+  on_success: &success
+    params:
+      channel: '#build'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
+      username: concourse
+    put: notify
+    tags: [amd64]
+  plan:
+  - get: containerfiles
+    passed:
+    - pipeline
+    trigger: true
+  - config:
+      image_resource:
+        source:
+          repository: vito/oci-build-task
+        type: registry-image
+      inputs:
+      - name: containerfiles
+      outputs:
+      - name: image
+      params:
+        CONTEXT: containerfiles/honeyaws
+      platform: linux
+      run:
+        path: build
+    privileged: true
+    task: build-amd64
+    tags: [amd64]
+  - params:
+      image: image/image.tar
+      version: 1.4.2
+    put: thatsamguy-registry-amd64
+    tags: [amd64]
 resource_types:
 - name: slack-notification
   source:
