@@ -69,7 +69,7 @@ jobs:
         inputs:
         - name: containerfiles
         outputs:
-        - name: image
+        - name: image-arm64
         params:
           CONTEXT: containerfiles/certbot-dns
         platform: linux
@@ -86,7 +86,7 @@ jobs:
         inputs:
         - name: containerfiles
         outputs:
-        - name: image
+        - name: image-amd64
         params:
           CONTEXT: containerfiles/certbot-dns
         platform: linux
@@ -97,12 +97,12 @@ jobs:
       tags: [amd64]
   - in_parallel:
     - params:
-        image: image/image.tar
+        image: image-arm64/image.tar
         additional_tags: tags/tags
       put: thatsamguy-registry-arm64
       tags: [arm64]
     - params:
-        image: image/image.tar
+        image: image-amd64/image.tar
         additional_tags: tags/tags
       put: thatsamguy-registry-amd64
       tags: [amd64]

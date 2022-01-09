@@ -48,7 +48,7 @@ jobs:
         inputs:
         - name: containerfiles
         outputs:
-        - name: image
+        - name: image-arm64
         params:
           CONTEXT: containerfiles/honeyaws
           DOCKERFILE: containerfiles/honeyaws/Dockerfile.arm64
@@ -66,7 +66,7 @@ jobs:
         inputs:
         - name: containerfiles
         outputs:
-        - name: image
+        - name: image-amd64
         params:
           CONTEXT: containerfiles/honeyaws
         platform: linux
@@ -77,12 +77,12 @@ jobs:
       tags: [amd64]
   - in_parallel:
     - params:
-        image: image/image.tar
+        image: image-arm64/image.tar
         version: 1.4.2
       put: thatsamguy-registry-arm64
       tags: [arm64]
     - params:
-        image: image/image.tar
+        image: image-amd64/image.tar
         version: 1.4.2
       put: thatsamguy-registry-amd64
       tags: [amd64]
