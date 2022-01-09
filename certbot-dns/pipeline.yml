@@ -60,50 +60,51 @@ jobs:
           if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
         path: bash
     task: tag
-  - config:
-      image_resource:
-        source:
-          repository: rdclda/concourse-oci-build-task #vito/oci-build-task
-        type: registry-image
-      inputs:
-      - name: containerfiles
-      outputs:
-      - name: image
-      params:
-        CONTEXT: containerfiles/certbot-dns
-      platform: linux
-      run:
-        path: build
-    privileged: true
-    task: build-arm64
-    tags: [arm64]
-  - params:
-      image: image/image.tar
-      additional_tags: tags/tags
-    put: thatsamguy-registry-arm64
-    tags: [arm64]
-  - config:
-      image_resource:
-        source:
-          repository: vito/oci-build-task
-        type: registry-image
-      inputs:
-      - name: containerfiles
-      outputs:
-      - name: image
-      params:
-        CONTEXT: containerfiles/certbot-dns
-      platform: linux
-      run:
-        path: build
-    privileged: true
-    task: build-amd64
-    tags: [amd64]
-  - params:
-      image: image/image.tar
-      additional_tags: tags/tags
-    put: thatsamguy-registry-amd64
-    tags: [amd64]
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: rdclda/concourse-oci-build-task #vito/oci-build-task
+          type: registry-image
+        inputs:
+        - name: containerfiles
+        outputs:
+        - name: image
+        params:
+          CONTEXT: containerfiles/certbot-dns
+        platform: linux
+        run:
+          path: build
+      privileged: true
+      task: build-arm64
+      tags: [arm64]
+    - params:
+        image: image/image.tar
+        additional_tags: tags/tags
+      put: thatsamguy-registry-arm64
+      tags: [arm64]
+    - config:
+        image_resource:
+          source:
+            repository: vito/oci-build-task
+          type: registry-image
+        inputs:
+        - name: containerfiles
+        outputs:
+        - name: image
+        params:
+          CONTEXT: containerfiles/certbot-dns
+        platform: linux
+        run:
+          path: build
+      privileged: true
+      task: build-amd64
+      tags: [amd64]
+    - params:
+        image: image/image.tar
+        additional_tags: tags/tags
+      put: thatsamguy-registry-amd64
+      tags: [amd64]
 resource_types:
 - name: slack-notification
   source:
