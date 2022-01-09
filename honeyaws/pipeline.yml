@@ -122,6 +122,7 @@ resources:
   type: slack-alert
   source:
     url: ((slack-webhook))
+    username: concourse
 - icon: docker
   name: thatsamguy-registry-amd64
   source:
