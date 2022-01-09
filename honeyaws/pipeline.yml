@@ -14,27 +14,21 @@ jobs:
   - file: containerfiles/honeyaws/pipeline.yml
     set_pipeline: img-honeyaws
 - name: build-arm64
-  on_error: &failure
+  on_error:
     params:
       channel: '#build'
-      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
-      silent: true
-      text: |
-        :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
-      username: concourse
+      alert_type: 'errored'
     put: notify
-    tags: [amd64]
-  on_failure: *failure
-  on_success: &success
+  on_failure:
     params:
       channel: '#build'
-      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
-      silent: true
-      text: |
-        :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
-      username: concourse
+      alert_type: 'failed'
     put: notify
-    tags: [amd64]
+  on_success:
+    params:
+      channel: '#build'
+      alert_type: 'success'
+    put: notify
   plan:
   - get: containerfiles
     passed:
@@ -64,27 +58,21 @@ jobs:
     put: thatsamguy-registry-arm64
     tags: [arm64]
 - name: build-amd64
-  on_error: &failure
+  on_error:
     params:
       channel: '#build'
-      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
-      silent: true
-      text: |
-        :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
-      username: concourse
+      alert_type: 'errored'
     put: notify
-    tags: [amd64]
-  on_failure: *failure
-  on_success: &success
+  on_failure:
     params:
       channel: '#build'
-      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
-      silent: true
-      text: |
-        :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
-      username: concourse
+      alert_type: 'failed'
     put: notify
-    tags: [amd64]
+  on_success:
+    params:
+      channel: '#build'
+      alert_type: 'success'
+    put: notify
   plan:
   - get: containerfiles
     passed:
@@ -113,10 +101,10 @@ jobs:
     put: thatsamguy-registry-amd64
     tags: [amd64]
 resource_types:
-- name: slack-notification
-  source:
-    repository: cfcommunity/slack-notification-resource
+- name: slack-alert
   type: docker-image
+  source:
+    repository: arbourd/concourse-slack-alert-resource
 resources:
 - icon: github
   name: containerfiles
@@ -131,9 +119,9 @@ resources:
   type: git
 - icon: slack
   name: notify
+  type: slack-alert
   source:
     url: ((slack-webhook))
-  type: slack-notification
 - icon: docker
   name: thatsamguy-registry-amd64
   source:

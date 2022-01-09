@@ -55,6 +55,7 @@ jobs:
           if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
         path: bash
     task: tag
+    tags: [amd64]
   - config:
       image_resource:
         source:
@@ -119,6 +120,7 @@ jobs:
           if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
         path: bash
     task: tag
+    tags: [amd64]
   - config:
       image_resource:
         source:
