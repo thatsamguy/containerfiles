@@ -40,7 +40,7 @@ jobs:
       image_resource:
         source:
           repository: python
-          tag: slim
+          tag: 3-slim
         type: registry-image
       inputs:
       - name: containerfiles
