@@ -39,8 +39,8 @@ jobs:
   - config:
       image_resource:
         source:
-          repository: public.ecr.aws/docker/library/python
-          tag: slim
+          repository: python
+          tag: 3-slim
         type: registry-image
       inputs:
       - name: containerfiles
