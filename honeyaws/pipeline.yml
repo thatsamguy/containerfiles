@@ -1,6 +1,6 @@
 groups:
 - jobs:
-  - build-arm64
+  # - build-arm64
   - build-amd64
   name: build
 - jobs:
@@ -13,50 +13,50 @@ jobs:
     trigger: true
   - file: containerfiles/honeyaws/pipeline.yml
     set_pipeline: img-honeyaws
-- name: build-arm64
-  on_error:
-    params:
-      channel: '#build'
-      alert_type: 'errored'
-    put: notify
-  on_failure:
-    params:
-      channel: '#build'
-      alert_type: 'failed'
-    put: notify
-  on_success:
-    params:
-      channel: '#build'
-      alert_type: 'success'
-    put: notify
-  plan:
-  - get: containerfiles
-    passed:
-    - pipeline
-    trigger: true
-  - config:
-      image_resource:
-        source:
-          repository: rdclda/concourse-oci-build-task
-        type: registry-image
-      inputs:
-      - name: containerfiles
-      outputs:
-      - name: image
-      params:
-        CONTEXT: containerfiles/honeyaws
-        DOCKERFILE: containerfiles/honeyaws/Dockerfile.arm64
-      platform: linux
-      run:
-        path: build
-    privileged: true
-    task: build-arm64
-    tags: [arm64]
-  - params:
-      image: image/image.tar
-      version: 1.4.2
-    put: thatsamguy-registry-arm64
-    tags: [arm64]
+# - name: build-arm64
+#   on_error:
+#     params:
+#       channel: '#build'
+#       alert_type: 'errored'
+#     put: notify
+#   on_failure:
+#     params:
+#       channel: '#build'
+#       alert_type: 'failed'
+#     put: notify
+#   on_success:
+#     params:
+#       channel: '#build'
+#       alert_type: 'success'
+#     put: notify
+#   plan:
+#   - get: containerfiles
+#     passed:
+#     - pipeline
+#     trigger: true
+#   - config:
+#       image_resource:
+#         source:
+#           repository: rdclda/concourse-oci-build-task
+#         type: registry-image
+#       inputs:
+#       - name: containerfiles
+#       outputs:
+#       - name: image
+#       params:
+#         CONTEXT: containerfiles/honeyaws
+#         DOCKERFILE: containerfiles/honeyaws/Dockerfile.arm64
+#       platform: linux
+#       run:
+#         path: build
+#     privileged: true
+#     task: build-arm64
+#     tags: [arm64]
+#   - params:
+#       image: image/image.tar
+#       version: 1.4.2
+#     put: thatsamguy-registry-arm64
+#     tags: [arm64]
 - name: build-amd64
   on_error:
     params:
@@ -128,9 +128,9 @@ resources:
     repository: registry.thatsamguy.com/thatsamguy/honeyaws
     tag: latest
   type: registry-image
-- icon: docker
-  name: thatsamguy-registry-arm64
-  source:
-    repository: registry.thatsamguy.com/thatsamguy/honeyaws-arm64
-    tag: latest
-  type: registry-image
+# - icon: docker
+#   name: thatsamguy-registry-arm64
+#   source:
+#     repository: registry.thatsamguy.com/thatsamguy/honeyaws-arm64
+#     tag: latest
+#   type: registry-image
