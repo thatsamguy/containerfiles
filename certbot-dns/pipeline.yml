@@ -78,21 +78,27 @@ jobs:
 #     put: thatsamguy-registry-arm64
 #     tags: [arm64]
 - name: build-amd64
-  on_error:
+  on_error: &failure
     params:
       channel: '#build'
-      alert_type: 'errored'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
+      username: concourse
     put: notify
-  on_failure:
+    tags: [amd64]
+  on_failure: *failure
+  on_success: &success
     params:
       channel: '#build'
-      alert_type: 'failed'
+      icon_url: https://concourse-ci.org/images/trademarks/concourse-black.png
+      silent: true
+      text: |
+        :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
+      username: concourse
     put: notify
-  on_success:
-    params:
-      channel: '#build'
-      alert_type: 'success'
-    put: notify
+    tags: [amd64]
   plan:
   - get: containerfiles
     passed:
@@ -142,10 +148,10 @@ jobs:
     put: thatsamguy-registry-amd64
     tags: [amd64]
 resource_types:
-- name: slack-alert
-  type: docker-image
+- name: slack-notification
   source:
-    repository: arbourd/concourse-slack-alert-resource
+    repository: cfcommunity/slack-notification-resource
+  type: docker-image
 resources:
 - icon: github
   name: containerfiles
@@ -160,9 +166,9 @@ resources:
   type: git
 - icon: slack
   name: notify
-  type: slack-alert
   source:
     url: ((slack-webhook))
+  type: slack-notification
 - icon: docker
   name: thatsamguy-registry-amd64
   source:
