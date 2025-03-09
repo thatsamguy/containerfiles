@@ -54,7 +54,6 @@ jobs:
 #           if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
 #         path: bash
 #     task: tag
-#     tags: [amd64]
 #   - config:
 #       image_resource:
 #         source:
@@ -71,12 +70,10 @@ jobs:
 #         path: build
 #     privileged: true
 #     task: build-arm64
-#     tags: [arm64]
 #   - params:
 #       image: image/image.tar
 #       additional_tags: tags/tags
 #     put: thatsamguy-registry-arm64
-#     tags: [arm64]
 - name: build-amd64
   on_error: &failure
     params:
@@ -87,7 +84,6 @@ jobs:
         :boom: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME failed. <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
       username: concourse
     put: notify
-    tags: [amd64]
   on_failure: *failure
   on_success: &success
     params:
@@ -98,7 +94,6 @@ jobs:
         :airplane_departure: $BUILD_JOB_NAME of $BUILD_PIPELINE_NAME completed! <((ci-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|Check it out>.
       username: concourse
     put: notify
-    tags: [amd64]
   plan:
   - get: containerfiles
     passed:
@@ -124,7 +119,6 @@ jobs:
           if [[ "$VERSION" != "" ]]; then echo "$VERSION" >> tags/tags; else exit 1; fi;
         path: bash
     task: tag
-    tags: [amd64]
   - config:
       image_resource:
         source:
@@ -141,12 +135,10 @@ jobs:
         path: build
     privileged: true
     task: build-amd64
-    tags: [amd64]
   - params:
       image: image/image.tar
       additional_tags: tags/tags
     put: thatsamguy-registry-amd64
-    tags: [amd64]
 resource_types:
 - name: slack-notification
   source:
